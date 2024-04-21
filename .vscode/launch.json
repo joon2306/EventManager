@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Android",
+        "cwd": "${workspaceFolder}",
+        "type": "reactnative",
+        "request": "launch",
+        "platform": "android",
+        "sourceMaps": true,
+        "outDir": "${workspaceFolder}/.vscode/.react",
+        "port": 8081,
+        "target": "device",
+        "internalConsoleOptions": "neverOpen",
+        "expoHostType": "LAN"
+      },
+      {
+        "name": "Debug iOS",
+        "cwd": "${workspaceFolder}",
+        "type": "reactnative",
+        "request": "launch",
+        "platform": "ios",
+        "sourceMaps": true,
+        "outDir": "${workspaceFolder}/.vscode/.react",
+        "port": 8081,
+        "target": "simulator",
+        "internalConsoleOptions": "neverOpen",
+        "expoHostType": "LAN"
+      }
+    ]
+  }
+  
