@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, Platform, TouchableOpacity, Text, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ButtonList, Banner } from '../CommonComponents/Common';
+import { ButtonList, Banner, ModalAlert } from '../CommonComponents/Common';
 import { Modal, Portal, Provider, Button as PaperButton } from 'react-native-paper';
 
 const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventTime: initialEventTime = new Date(), eventDescription: initialEventDescription = '', navigation }) => {
@@ -116,14 +116,7 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
                         value={description}
                     />
                 </ScrollView>
-                <Portal>
-                    <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-                        <View style={styles.modalContainer}>
-                            <Text style={styles.modalMessage}>{modalMessage}</Text>
-                            <PaperButton onPress={() => setModalVisible(false)}>OK</PaperButton>
-                        </View>
-                    </Modal>
-                </Portal>
+                <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} ></ModalAlert>
                 <View style={styles.footer}>
                     <ButtonList btns={btnList} />
                     <Banner message={"Event Added"} isVisible={bannerVisible} />
@@ -139,6 +132,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         paddingHorizontal: 20,
         paddingVertical: 40,
+        backgroundColor: "#f2f4f5"
 
     },
     input: {
@@ -158,18 +152,7 @@ const styles = StyleSheet.create({
     footer: {
         paddingHorizontal: 20,
         paddingBottom: 20,
-    },
-    modalContainer: {
-        backgroundColor: 'white',
-        padding: 20,
-        margin: 50,
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    modalMessage: {
-        marginBottom: 20,
-        textAlign: 'center',
-    },
+    }
 });
 
 export default EventForm;
