@@ -12,11 +12,6 @@ export default Add = ({ navigation }) => {
 
 
     return (
-        <View>
-            <View>
-                <EventForm />
-            </View>
-
-        </View>
+        <EventForm navigation={navigation} />  
     )
 }

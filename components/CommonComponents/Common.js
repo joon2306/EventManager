@@ -1,5 +1,6 @@
-import { Button } from "react-native-paper";
+import { Button, Snackbar } from "react-native-paper";
 import { View, StyleSheet, Text } from "react-native";
+import React from "react";
 
 const ButtonList = ({ btns }) => {
     const calculateBtnMargin = () => {
@@ -37,6 +38,25 @@ const ButtonList = ({ btns }) => {
 }
 
 
+const Banner = ({ message, isVisible }) => {
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            justifyContent: 'space-between',
+        },
+    });
+
+    return (
+        <View style={styles.container}>
+            <Snackbar
+                visible={isVisible}>
+                {message}
+            </Snackbar>
+        </View>
+    );
+}
 
 
-export { ButtonList };
+
+
+export { ButtonList, Banner };
