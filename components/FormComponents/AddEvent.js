@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, Platform, TouchableOpacity, Text, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ButtonList, Banner, ModalAlert } from '../CommonComponents/Common';
-import { Modal, Portal, Provider, Button as PaperButton } from 'react-native-paper';
+import { Modal, Portal, Provider, Button as PaperButton, Button } from 'react-native-paper';
 
 const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventTime: initialEventTime = new Date(), eventDescription: initialEventDescription = '', navigation }) => {
     const [eventName, setEventName] = useState(initialEventName);
@@ -118,7 +118,7 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
                 </ScrollView>
                 <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} ></ModalAlert>
                 <View style={styles.footer}>
-                    <ButtonList btns={btnList} />
+                <Button icon="calendar-plus" mode="outlined" style={{marginHorizontal: 20}} onPress={handleSubmit}> Add</Button>
                     <Banner message={"Event Added"} isVisible={bannerVisible} />
                 </View>
             </View>
