@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Agenda } from 'react-native-calendars';
 import { format, parse } from "date-fns";
 import { PaperProvider, Button, Searchbar, Portal, ActivityIndicator } from 'react-native-paper';
-import { ButtonList } from '../components/CommonComponents/Common';
+import _ from 'lodash';
+import { Banner, ModalAlert } from '../components/CommonComponents/Common';
+
 export default Home = ({ navigation }) => {
     const events = {
         '2024-04-20': [{ time: '09:00', title: 'Meeting 1' }, { time: '13:30', title: 'Meeting 2' }],
-        '2024-04-24': [{ time: '09:00', title: 'Meeting 1' }, { time: '14:30', title: 'Meeting 2' }],
-        '2024-04-25': [{ time: '09:00', title: 'Meeting 1' }, { time: '15:30', title: 'Meeting 2' }],
+        '2024-04-24': [{ time: '09:00', title: 'Meeting 3' }, { time: '14:30', title: 'Meeting 3' }],
+        '2024-04-25': [{ time: '09:00', title: 'event 4' }, { time: '15:30', title: 'event 5' }],
     };
 
     const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 
     const [searchQuery, setSearchQuery] = React.useState('');
     const [loading, setLoading] = useState(false);
+
+    const [isBannerVisible, setBannerVisible] = useState(false);
+
+    const [bannerMsg, setBannerMsg] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
     const handleDayPress = (day) => {
         setSelectedDate(day.dateString);
@@ -30,15 +38,6 @@ export default Home = ({ navigation }) => {
             </View>
         )
     }
-
-    const btnList = [
-        {
-            label: "Add",
-            icon: "calendar-plus",
-            mode: "outlined",
-            callback: () => navigation.navigate("Add Event")
-        }
-    ]
 
     const styles = StyleSheet.create({
         container: {
@@ -82,6 +81,41 @@ export default Home = ({ navigation }) => {
         }, 1000);
     }
 
+    const findEventDates = (txt) => {
+        txt = txt.toLowerCase();
+        const eventDates = [];
+        _.forOwn(events, (event, date) => {
+            const eventFound = event.some(e => e.title && e.title.toLowerCase().indexOf(txt) > -1);
+            if (eventFound) {
+                eventDates.push(date);
+            }
+        })
+        return eventDates;
+    }
+
+    const notify = msg => {
+        setBannerMsg(msg);
+        setBannerVisible(true);
+        setTimeout(() => setBannerVisible(false), 1000);
+    }
+
+    const buildDateList = (eventDates) => {
+        const handleDateClick = (date) => {
+            // Do something when a date is clicked
+            console.log('Date clicked:', date);
+        };
+
+        return (
+            <View>
+                {eventDates.map((date, index) => (
+                    <TouchableOpacity key={index} onPress={() => handleDateClick(date)}>
+                        <Text style={{ marginVertical: 5 }}>{date}</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+        );
+    };
+
 
     const handleSearch = () => {
         const date = getDate(searchQuery);
@@ -95,7 +129,17 @@ export default Home = ({ navigation }) => {
             setSelectedDate(format(new Date(year, 0, 1), "yyyy-MM-dd"));
             return;
         } else {
-            // do something else
+            const eventDates = findEventDates(searchQuery);
+            if (eventDates.length) {
+                if (eventDates.length > 1) {
+                    setModalMessage(buildDateList(eventDates));
+                    setModalVisible(true);
+                } else {
+                    setSelectedDate(eventDates[0]);
+                }
+            } else {
+                notify("No event found");
+            }
         }
     }
 
@@ -124,8 +168,10 @@ export default Home = ({ navigation }) => {
                     />
                 )}
             </View>
+            <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} ></ModalAlert>
 
             <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                <Banner message={bannerMsg} isVisible={isBannerVisible} />
                 <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={() => navigation.navigate("Add Event")}> Add</Button>
                 <Searchbar
                     placeholder="Search"
