@@ -25,7 +25,7 @@ export default Home = ({ navigation }) => {
     const [modalMessage, setModalMessage] = useState('');
 
     const handleDayPress = (day) => {
-        setSelectedDate(day.dateString);
+        setActiveDate(day.dateString);
     };
 
     function generateUUID() {
@@ -34,6 +34,29 @@ export default Home = ({ navigation }) => {
                 v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
+    }
+
+    const setActiveDate = (date) => {
+        const findMissingDate = (events) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set time to beginning of the day for accurate comparison
+        
+            let currentDate = new Date(today);
+        
+            while (true) {
+                const dateString = currentDate.toISOString().split('T')[0]; // Get date string in YYYY-MM-DD format
+        
+                if (!(dateString in events)) {
+                    return dateString;
+                }
+        
+                currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+            }
+        }
+
+        const missingDate = findMissingDate(events);
+        setSelectedDate(missingDate);
+        setTimeout(() => setSelectedDate(date), 0);
     }
 
 
@@ -114,7 +137,7 @@ export default Home = ({ navigation }) => {
         const handleDateClick = (date) => {
             // Do something when a date is clicked
             setModalVisible(false);
-            setSelectedDate(date);
+            setActiveDate(date);
         };
     
         // Convert the eventMap object into an array of React elements
@@ -138,12 +161,12 @@ export default Home = ({ navigation }) => {
         const date = getDate(searchQuery);
         if (date !== null) {
             addLoader();
-            setSelectedDate(format(date, "yyyy-MM-dd"));
+            setActiveDate(format(date, "yyyy-MM-dd"));
             return;
         } else if (isYear(searchQuery)) {
             addLoader();
             const year = Number(searchQuery);
-            setSelectedDate(format(new Date(year, 0, 1), "yyyy-MM-dd"));
+            setActiveDate(format(new Date(year, 0, 1), "yyyy-MM-dd"));
             return;
         } else {
             const eventDates = findEventDates(searchQuery);
@@ -153,7 +176,7 @@ export default Home = ({ navigation }) => {
                     setModalMessage(buildDateList(eventDates));
                     setModalVisible(true);
                 } else {
-                    setSelectedDate(keys[0]);
+                    setActiveDate(keys[0]);
                 }
             } else {
                 notify("No event found");
