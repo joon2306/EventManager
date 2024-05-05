@@ -11,6 +11,7 @@ export default Home = ({ navigation }) => {
         '2024-04-20': [{ time: '09:00', title: 'Meeting 1' }, { time: '13:30', title: 'Meeting 2' }],
         '2024-04-24': [{ time: '09:00', title: 'Meeting 3' }, { time: '14:30', title: 'Meeting 3' }],
         '2024-04-25': [{ time: '09:00', title: 'event 4' }, { time: '15:30', title: 'event 5' }],
+        '2024-05-21': [{ time: '09:00', title: 'Meeting 3' }, { time: '14:30', title: 'Meeting 3' }]
     };
 
     const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -62,7 +63,6 @@ export default Home = ({ navigation }) => {
 
 
     const handleRenderItem = (item) => {
-        console.log("item rendered: ", item);
         const { time, title } = item;
        
         return (
@@ -153,7 +153,13 @@ export default Home = ({ navigation }) => {
             });
         }
     
-        return <ScrollView>{dateElements}</ScrollView>;
+        return (
+            <View style={{ maxWidth: 200, maxHeight: 200 }}>
+                <ScrollView style={{ flex: 1 }}>
+                    {dateElements}
+                </ScrollView>
+            </View>
+        );
     };
 
 
@@ -220,7 +226,6 @@ export default Home = ({ navigation }) => {
                     value={searchQuery}
                     onIconPress={handleSearch}
                     style={{ margin: 20 }}
-
                 />
             </View>
         </PaperProvider>
