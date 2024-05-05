@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Agenda } from 'react-native-calendars';
 import { format, parse } from "date-fns";
 import { PaperProvider, Button, Searchbar, Portal, ActivityIndicator } from 'react-native-paper';
@@ -28,9 +28,20 @@ export default Home = ({ navigation }) => {
         setSelectedDate(day.dateString);
     };
 
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+
 
     const handleRenderItem = (item) => {
+        console.log("item rendered: ", item);
         const { time, title } = item;
+       
         return (
             <View style={{ padding: 10 }}>
                 <Text>{time}</Text>
@@ -83,14 +94,14 @@ export default Home = ({ navigation }) => {
 
     const findEventDates = (txt) => {
         txt = txt.toLowerCase();
-        const eventDates = [];
+        const eventMap = {};
         _.forOwn(events, (event, date) => {
             const eventFound = event.some(e => e.title && e.title.toLowerCase().indexOf(txt) > -1);
             if (eventFound) {
-                eventDates.push(date);
+                eventMap[date] = event;
             }
-        })
-        return eventDates;
+        });
+        return eventMap;
     }
 
     const notify = msg => {
@@ -99,21 +110,27 @@ export default Home = ({ navigation }) => {
         setTimeout(() => setBannerVisible(false), 1000);
     }
 
-    const buildDateList = (eventDates) => {
+    const buildDateList = (eventMap) => {
         const handleDateClick = (date) => {
             // Do something when a date is clicked
-            console.log('Date clicked:', date);
+            setModalVisible(false);
+            setSelectedDate(date);
         };
-
-        return (
-            <View>
-                {eventDates.map((date, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleDateClick(date)}>
-                        <Text style={{ marginVertical: 5 }}>{date}</Text>
+    
+        // Convert the eventMap object into an array of React elements
+        const dateElements = [];
+        for (const date in eventMap) {
+            const events = eventMap[date];
+            events.forEach(({ title }) => {
+                dateElements.push(
+                    <TouchableOpacity key={generateUUID()} onPress={() => handleDateClick(date)}>
+                        <Text style={{ marginVertical: 5 }}>{title}</Text>
                     </TouchableOpacity>
-                ))}
-            </View>
-        );
+                );
+            });
+        }
+    
+        return <ScrollView>{dateElements}</ScrollView>;
     };
 
 
@@ -130,12 +147,13 @@ export default Home = ({ navigation }) => {
             return;
         } else {
             const eventDates = findEventDates(searchQuery);
-            if (eventDates.length) {
-                if (eventDates.length > 1) {
+            if (!_.isEmpty(eventDates)) {
+                const keys = Object.keys(eventDates);
+                if (keys.length > 1) {
                     setModalMessage(buildDateList(eventDates));
                     setModalVisible(true);
                 } else {
-                    setSelectedDate(eventDates[0]);
+                    setSelectedDate(keys[0]);
                 }
             } else {
                 notify("No event found");
@@ -168,7 +186,7 @@ export default Home = ({ navigation }) => {
                     />
                 )}
             </View>
-            <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} ></ModalAlert>
+            <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} hideBtn={true} ></ModalAlert>
 
             <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
                 <Banner message={bannerMsg} isVisible={isBannerVisible} />

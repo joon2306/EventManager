@@ -49,7 +49,7 @@ const Banner = ({ message, isVisible }) => {
     );
 }
 
-const ModalAlert = ({modalVisible, setModalVisible, modalMessage}) => {
+const ModalAlert = ({modalVisible, setModalVisible, modalMessage, hideBtn}) => {
     const styles = StyleSheet.create({
         modalContainer: {
             backgroundColor: 'white',
@@ -68,7 +68,7 @@ const ModalAlert = ({modalVisible, setModalVisible, modalMessage}) => {
             <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
                 <View style={styles.modalContainer}>
                     <Text style={styles.modalMessage}>{modalMessage}</Text>
-                    <PaperButton onPress={() => setModalVisible(false)}>OK</PaperButton>
+                    {!hideBtn && <PaperButton onPress={() => setModalVisible(false)}>OK</PaperButton>}
                 </View>
             </Modal>
         </Portal>
