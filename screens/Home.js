@@ -8,10 +8,10 @@ import { Banner, ModalAlert } from '../components/CommonComponents/Common';
 
 export default Home = ({ navigation }) => {
     const events = {
-        '2024-04-20': [{ time: '09:00', title: 'Meeting 1' }, { time: '13:30', title: 'Meeting 2' }],
-        '2024-04-24': [{ time: '09:00', title: 'Meeting 3' }, { time: '14:30', title: 'Meeting 3' }],
-        '2024-04-25': [{ time: '09:00', title: 'event 4' }, { time: '15:30', title: 'event 5' }],
-        '2024-05-21': [{ time: '09:00', title: 'Meeting 3' }, { time: '14:30', title: 'Meeting 3' }]
+        '2024-04-20': [{ time: '09:00', title: 'Meeting 1', desc:"meeting desc 1" }, { time: '13:30', title: 'Meeting 2', desc:"meeting desc 2" }],
+        '2024-04-24': [{ time: '09:00', title: 'Meeting 3', desc:"meeting desc 3" }, { time: '14:30', title: 'Meeting 3', desc:"meeting desc 3" }],
+        '2024-04-25': [{ time: '09:00', title: 'event 4', desc:"meeting desc 4" }, { time: '15:30', title: 'event 5', desc:"meeting desc 5" }],
+        '2024-05-21': [{ time: '09:00', title: 'Meeting 3', desc:"meeting desc 3" }, { time: '14:30', title: 'Meeting 3', desc:"meeting desc 3" }]
     };
 
     const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -60,6 +60,10 @@ export default Home = ({ navigation }) => {
         setTimeout(() => setSelectedDate(date), 0);
     }
 
+    const edit = (item) => {
+        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventTime: item.time, eventDescription: item.desc });
+    }
+
 
 
     const handleRenderItem = (item) => {
@@ -67,8 +71,10 @@ export default Home = ({ navigation }) => {
        
         return (
             <View style={{ padding: 10 }}>
+                <TouchableOpacity onLongPress={() => edit(item)}>
                 <Text>{time}</Text>
                 <Text>{title}</Text>
+                </TouchableOpacity>
             </View>
         )
     }

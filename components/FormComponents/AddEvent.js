@@ -33,6 +33,7 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
 
     const handleTimeChange = (event, selectedTime) => {
         const currentTime = selectedTime || time;
+        console.log("currentTime: ", currentTime);
         setShowTimePicker(Platform.OS === 'ios');
         setTime(currentTime);
     };

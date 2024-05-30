@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native"
 import EventForm from "../components/FormComponents/AddEvent"
 import { parseISO } from 'date-fns'
+import { useRoute } from '@react-navigation/native';
 
 
 export default Add = ({ navigation }) => {
@@ -10,8 +10,23 @@ export default Add = ({ navigation }) => {
     const dateString = '2024-01-12';
     const dateObject = parseISO(dateString);
 
+    let eventName;
+    let eventDate;
+    let eventTime;
+    let eventDescription;
+
+    const route = useRoute();
+
+    if (route && route.params) {
+        eventName = route.params.eventName;
+        eventDate = parseISO(route.params.eventDate);
+        const dateTime = new Date(Date.parse(`1970-01-01T${route.params.eventTime}`));
+        eventTime = new Date(dateTime);
+        eventDescription = route.params.eventDescription;
+    }
+
 
     return (
-        <EventForm navigation={navigation} />  
+        <EventForm navigation={navigation} eventDate={eventDate} eventName={eventName} eventTime={eventTime} eventDescription={eventDescription} />
     )
 }
