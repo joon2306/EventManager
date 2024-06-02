@@ -1,4 +1,4 @@
-import { Button, Snackbar, Modal, Portal, Button as PaperButton} from "react-native-paper";
+import { Button, Snackbar, Modal, Portal, Button as PaperButton } from "react-native-paper";
 import { View, StyleSheet, Text } from "react-native";
 import React from "react";
 
@@ -49,7 +49,7 @@ const Banner = ({ message, isVisible }) => {
     );
 }
 
-const ModalAlert = ({modalVisible, setModalVisible, modalMessage, hideBtn}) => {
+const ModalAlert = ({ modalVisible, setModalVisible, modalMessage, hideBtn, callback }) => {
     const styles = StyleSheet.create({
         modalContainer: {
             backgroundColor: 'white',
@@ -63,12 +63,19 @@ const ModalAlert = ({modalVisible, setModalVisible, modalMessage, hideBtn}) => {
             textAlign: 'center',
         },
     });
+
+    const onPress = async () => {
+        if (callback) {
+            await callback();
+        }
+        setModalVisible(false);
+    }
     return (
         <Portal>
             <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)}>
                 <View style={styles.modalContainer}>
                     <Text style={styles.modalMessage}>{modalMessage}</Text>
-                    {!hideBtn && <PaperButton onPress={() => setModalVisible(false)}>OK</PaperButton>}
+                    {!hideBtn && <PaperButton onPress={onPress}>OK</PaperButton>}
                 </View>
             </Modal>
         </Portal>

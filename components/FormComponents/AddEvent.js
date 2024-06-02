@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { ButtonList, Banner, ModalAlert } from '../CommonComponents/Common';
 import { Modal, Portal, Provider, Button as PaperButton, Button } from 'react-native-paper';
 
-const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventTime: initialEventTime = new Date(), eventDescription: initialEventDescription = '', navigation }) => {
+const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventTime: initialEventTime = new Date(), eventDescription: initialEventDescription = '', navigation, isEdit }) => {
     const [eventName, setEventName] = useState(initialEventName);
     const [eventDate, setEventDate] = useState(initialEventDate);
     const [description, setDescription] = useState(initialEventDescription);
@@ -15,6 +15,8 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
     const [modalMessage, setModalMessage] = useState('');
 
     const [bannerVisible, setBannerVisible] = useState(false);
+    const [bannerMsg, setBannerMsg] = useState("");
+    const [modalCb, setModalCb] = useState(undefined);
 
     const btnList = [
         {
@@ -50,13 +52,21 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
         if (!eventName || !eventDate || !description) {
             setModalMessage('All fields are required.');
             setModalVisible(true);
+            setModalCb(undefined);
             return;
         }
 
         if (eventDate < new Date()) {
             setModalMessage('Date cannot be in the past.');
             setModalVisible(true);
+            setModalCb(undefined);
             return;
+        }
+
+        if (isEdit) {
+            setBannerMsg("Event editted");
+        } else {
+            setBannerMsg("Event Added");
         }
 
         setBannerVisible(true);
@@ -71,6 +81,35 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
         }, 1000)
 
     };
+
+    const handleDelete = () => {
+   
+        const deleteCb = () => {
+            setBannerVisible(true);
+            setTimeout(() => {
+                navigation.navigate("Events")
+                setBannerVisible(false);
+            }, 1000)
+        }
+
+        setModalCb(() => deleteCb);
+
+        setModalMessage("Are you sure you want to delete this event?")
+        setModalVisible(true);
+
+    }
+
+    const displayBtn = () => {
+        if (!isEdit) {
+            return <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={handleSubmit}> Add</Button>
+        }
+        return (
+            <View>
+                <Button icon="calendar-plus" mode="outlined" style={{ marginVertical: 10 }} onPress={handleSubmit}> Edit</Button>
+                <Button icon="calendar-plus" mode="outlined" onPress={handleDelete}> Delete</Button>
+            </View>
+        )
+    }
 
     return (
         <Provider>
@@ -117,10 +156,10 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
                         value={description}
                     />
                 </ScrollView>
-                <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} ></ModalAlert>
+                <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} callback={modalCb} ></ModalAlert>
                 <View style={styles.footer}>
-                <Button icon="calendar-plus" mode="outlined" style={{marginHorizontal: 20}} onPress={handleSubmit}> Add</Button>
-                    <Banner message={"Event Added"} isVisible={bannerVisible} />
+                    {displayBtn()}
+                    <Banner message={bannerMsg} isVisible={bannerVisible} />
                 </View>
             </View>
 
@@ -144,7 +183,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginBottom: 10,
         justifyContent: 'center',
-        marginVertical:10
+        marginVertical: 10
     },
     textArea: {
         height: 100,
