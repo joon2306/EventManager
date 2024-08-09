@@ -64,7 +64,7 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
         }
 
         if (isEdit) {
-            setBannerMsg("Event editted");
+            setBannerMsg("Event edited");
         } else {
             setBannerMsg("Event Added");
         }
