@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Agenda } from 'react-native-calendars';
 import { format, parse } from "date-fns";
@@ -6,14 +6,24 @@ import { PaperProvider, Button, Searchbar, Portal, ActivityIndicator } from 'rea
 import _ from 'lodash';
 import { Banner, ModalAlert } from '../components/CommonComponents/Common';
 import eventTypeEnum from '../utils/EventTypeEnum';
+import eventsService from '../service/EventsService';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default Home = ({ navigation }) => {
     const events = {
-        '2024-04-20': [{  type: 1, title: 'Meeting 1', desc:"meeting desc 1" }, {  type: 1, title: 'Meeting 2', desc:"meeting desc 2" }],
-        '2024-04-24': [{  type: 2, title: 'Meeting 3', desc:"meeting desc 3" }, {  type: 2, title: 'Meeting 3', desc:"meeting desc 3" }],
-        '2024-04-25': [{  type: 1, title: 'event 4', desc:"meeting desc 4" }, { type: 1, title: 'event 5', desc:"meeting desc 5" }],
-        '2024-05-21': [{ type: 2, title: 'Meeting 3', desc:"meeting desc 3" }, {  type: 2, title: 'Meeting 3', desc:"meeting desc 3" }]
+        '2024-04-20': [{ type: 1, title: 'Meeting 1', desc: "meeting desc 1" }, { type: 1, title: 'Meeting 2', desc: "meeting desc 2" }],
+        '2024-04-24': [{ type: 2, title: 'Meeting 3', desc: "meeting desc 3" }, { type: 2, title: 'Meeting 3', desc: "meeting desc 3" }],
+        '2024-04-25': [{ type: 1, title: 'event 4', desc: "meeting desc 4" }, { type: 1, title: 'event 5', desc: "meeting desc 5" }],
+        '2024-05-21': [{ type: 2, title: 'Meeting 3', desc: "meeting desc 3" }, { type: 2, title: 'Meeting 3', desc: "meeting desc 3" }]
     };
+
+    const [testEvents, setTestEvents] = useState([]);
+
+    const initEvents = () => {
+        eventsService.fetchEvents().then((events) => {
+            setTestEvents(events);
+        });
+    }
 
     const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 
@@ -31,7 +41,7 @@ export default Home = ({ navigation }) => {
     };
 
     function generateUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0,
                 v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
@@ -42,16 +52,16 @@ export default Home = ({ navigation }) => {
         const findMissingDate = (events) => {
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Set time to beginning of the day for accurate comparison
-        
+
             let currentDate = new Date(today);
-        
+
             while (true) {
                 const dateString = currentDate.toISOString().split('T')[0]; // Get date string in YYYY-MM-DD format
-        
+
                 if (!(dateString in events)) {
                     return dateString;
                 }
-        
+
                 currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
             }
         }
@@ -72,12 +82,12 @@ export default Home = ({ navigation }) => {
 
         const eventType = eventTypeEnum[type];
 
-       
+
         return (
             <View style={{ padding: 10 }}>
                 <TouchableOpacity onLongPress={() => edit(item)}>
-                <Text>{title.toUpperCase()}</Text>
-                <Text>{eventType.toLowerCase()}</Text>
+                    <Text>{title.toUpperCase()}</Text>
+                    <Text>{eventType.toLowerCase()}</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -126,7 +136,7 @@ export default Home = ({ navigation }) => {
     }
 
     const findEventDates = (txt) => {
-        if(_.isEmpty(txt)) {
+        if (_.isEmpty(txt)) {
             return {};
         }
         txt = txt.toLowerCase();
@@ -152,7 +162,7 @@ export default Home = ({ navigation }) => {
             setModalVisible(false);
             setActiveDate(date);
         };
-    
+
         // Convert the eventMap object into an array of React elements
         const dateElements = [];
         for (const date in eventMap) {
@@ -165,7 +175,7 @@ export default Home = ({ navigation }) => {
                 );
             });
         }
-    
+
         return (
             <View style={{ maxWidth: 200, maxHeight: 200 }}>
                 <ScrollView style={{ flex: 1 }}>
@@ -203,44 +213,70 @@ export default Home = ({ navigation }) => {
         }
     }
 
+    useFocusEffect(
+        useCallback(() => {
+            initEvents();  // This will run every time the screen comes into focus
+
+            return () => {
+                // Cleanup if necessary
+            };
+        }, [])
+    );
+
     return (
         <PaperProvider>
-            <View style={{ flex: 1 }}>
-                {loading &&
-                    <Portal>
-                        <ActivityIndicator style={{ marginTop: '80%' }} size={"large"}></ActivityIndicator>
-                    </Portal>}
-                {(
-                    <Agenda
-                        items={events}
-                        renderItem={handleRenderItem}
-                        selected={selectedDate}
-                        onDayPress={handleDayPress}
-                        showOnlySelectedDayItems={true}
-                        showClosingKnob={true}
-                        renderEmptyData={() => {
-                            return (
-                                <View style={styles.container}>
-                                    <Text style={styles.centeredText}>No Events</Text>
-                                </View>
-                            )
-                        }}
-                    />
-                )}
-            </View>
+            {
+                testEvents.length === 0 && (
+                    <View style={styles.container}>
+                        <Text style={styles.centeredText}>Loading events...</Text>
+                    </View>
+                )
+            }
+            {
+                testEvents.length > 0 && (
+                    <View style={{ flex: 1 }}>
+                        {loading &&
+                            <Portal>
+                                <ActivityIndicator style={{ marginTop: '80%' }} size={"large"}></ActivityIndicator>
+                            </Portal>}
+                        {(
+                            <Agenda
+                                items={events}
+                                renderItem={handleRenderItem}
+                                selected={selectedDate}
+                                onDayPress={handleDayPress}
+                                showOnlySelectedDayItems={true}
+                                showClosingKnob={true}
+                                renderEmptyData={() => {
+                                    return (
+                                        <View style={styles.container}>
+                                            <Text style={styles.centeredText}>No Events</Text>
+                                        </View>
+                                    )
+                                }}
+                            />
+                        )}
+                    </View>
+                )
+            }
             <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} hideBtn={true} ></ModalAlert>
 
-            <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
-                <Banner message={bannerMsg} isVisible={isBannerVisible} />
-                <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={() => navigation.navigate("Add Event")}> Add</Button>
-                <Searchbar
-                    placeholder="Search"
-                    onChangeText={setSearchQuery}
-                    value={searchQuery}
-                    onIconPress={handleSearch}
-                    style={{ margin: 20 }}
-                />
-            </View>
+            {
+                testEvents.length > 0 && (
+                    <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
+                        <Banner message={bannerMsg} isVisible={isBannerVisible} />
+                        <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={() => navigation.navigate("Add Event")}> Add</Button>
+                        <Searchbar
+                            placeholder="Search"
+                            onChangeText={setSearchQuery}
+                            value={searchQuery}
+                            onIconPress={handleSearch}
+                            style={{ margin: 20 }}
+                        />
+                    </View>
+                )
+            } 
+
         </PaperProvider>
     );
 
