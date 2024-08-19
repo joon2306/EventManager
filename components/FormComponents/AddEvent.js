@@ -3,8 +3,11 @@ import { View, TextInput, StyleSheet, Platform, TouchableOpacity, Text, ScrollVi
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Banner, ModalAlert } from '../CommonComponents/Common';
 import { Provider, Button as PaperButton, Button, Menu } from 'react-native-paper'; // Import Menu
+import eventsService from '../../service/EventsService';
+import EventUtils from '../../utils/EventUtils';
 
-const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventDescription: initialEventDescription = '',initialEventType = 1, navigation, isEdit }) => {
+const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(),
+    eventDescription: initialEventDescription = '', initialEventType = 1, navigation, isEdit, eventId }) => {
     const [eventName, setEventName] = useState(initialEventName);
     const [eventDate, setEventDate] = useState(initialEventDate);
     const [description, setDescription] = useState(initialEventDescription);
@@ -29,6 +32,30 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
         setShowDatePicker(true);
     };
 
+
+    const handleError = (error) => {
+        setBannerMsg("Connection error...");
+        setBannerVisible(true);
+    }
+
+    const handleSave = ({ error }) => {
+        if (error !== null) {
+            handleError(error);
+            return;
+        }
+        const msg = isEdit ? 'Event edited' : 'Event saved';
+        setBannerMsg(msg);
+        completeAndRedirect();
+    }
+
+    const completeAndRedirect = () => {
+        setBannerVisible(true);
+        setTimeout(() => {
+            navigation.navigate("Events")
+            setBannerVisible(false);
+        }, 1000);
+    }
+
     const handleSubmit = () => {
         if (!eventName || !eventDate || !description) {
             setModalMessage('All fields are required.');
@@ -43,33 +70,21 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
             setModalCb(undefined);
             return;
         }
-
-        if (isEdit) {
-            setBannerMsg("Event edited");
-        } else {
-            setBannerMsg("Event Added");
-        }
-
-        setBannerVisible(true);
-        console.log('Event Name:', eventName);
-        console.log('Event Date:', eventDate.toDateString());
-        console.log('Description:', description);
-        console.log('Day Type:', dayType); // Log the selected option
-        console.log("banner visible: ", bannerVisible);
-        setTimeout(() => {
-            navigation.navigate("Events")
-            setBannerVisible(false);
-        }, 1000)
-
+        eventsService.saveEvent({ eventName, description, eventDate: EventUtils.handleDateConversion(eventDate), dayType, eventId })
+            .then(handleSave);
     };
 
     const handleDelete = () => {
         const deleteCb = () => {
-            setBannerVisible(true);
-            setTimeout(() => {
-                navigation.navigate("Events")
-                setBannerVisible(false);
-            }, 1000)
+            eventsService.deleteEventById(eventId).then(({ data, error }) => {
+                if (error !== null) {
+                    handleError();
+                    return;
+                }
+
+                setBannerMsg("Event deleted");
+                completeAndRedirect();
+            })
         }
 
         setModalCb(() => deleteCb);

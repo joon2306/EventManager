@@ -74,7 +74,7 @@ export default Home = ({ navigation }) => {
     }
 
     const edit = (item) => {
-        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.eventType, eventDescription: item.description });
+        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.eventType, eventDescription: item.description, eventId: item.id });
     }
 
 
