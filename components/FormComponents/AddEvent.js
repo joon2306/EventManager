@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Platform, TouchableOpacity, Text, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ButtonList, Banner, ModalAlert } from '../CommonComponents/Common';
-import { Modal, Portal, Provider, Button as PaperButton, Button } from 'react-native-paper';
+import { Banner, ModalAlert } from '../CommonComponents/Common';
+import { Provider, Button as PaperButton, Button, Menu } from 'react-native-paper'; // Import Menu
 
-const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventTime: initialEventTime = new Date(), eventDescription: initialEventDescription = '', navigation, isEdit }) => {
+const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDate = new Date(), eventDescription: initialEventDescription = '',initialEventType = 1, navigation, isEdit }) => {
     const [eventName, setEventName] = useState(initialEventName);
     const [eventDate, setEventDate] = useState(initialEventDate);
     const [description, setDescription] = useState(initialEventDescription);
-    const [time, setTime] = useState(initialEventTime);
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
-
     const [bannerVisible, setBannerVisible] = useState(false);
     const [bannerMsg, setBannerMsg] = useState("");
     const [modalCb, setModalCb] = useState(undefined);
+    const [dayType, setDayType] = useState(initialEventType); // State to manage the selected option
 
-    const btnList = [
-        {
-            label: "Add",
-            icon: "calendar-plus",
-            mode: "outlined",
-            callback: () => handleSubmit()
-        }
-    ]
+    // Menu state
+    const [visible, setVisible] = useState(false);
 
     const handleEventDateChange = (event, selectedDate) => {
         const currentDate = selectedDate || eventDate;
@@ -33,19 +25,8 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
         setEventDate(currentDate);
     };
 
-    const handleTimeChange = (event, selectedTime) => {
-        const currentTime = selectedTime || time;
-        console.log("currentTime: ", currentTime);
-        setShowTimePicker(Platform.OS === 'ios');
-        setTime(currentTime);
-    };
-
     const showDatePickerModal = () => {
         setShowDatePicker(true);
-    };
-
-    const showTimePickerModal = () => {
-        setShowTimePicker(true);
     };
 
     const handleSubmit = () => {
@@ -72,8 +53,8 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
         setBannerVisible(true);
         console.log('Event Name:', eventName);
         console.log('Event Date:', eventDate.toDateString());
-        console.log('Time:', time.toLocaleTimeString());
         console.log('Description:', description);
+        console.log('Day Type:', dayType); // Log the selected option
         console.log("banner visible: ", bannerVisible);
         setTimeout(() => {
             navigation.navigate("Events")
@@ -83,7 +64,6 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
     };
 
     const handleDelete = () => {
-   
         const deleteCb = () => {
             setBannerVisible(true);
             setTimeout(() => {
@@ -134,19 +114,33 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
                             onChange={handleEventDateChange}
                         />
                     )}
-                    <TouchableOpacity style={styles.input} onPress={showTimePickerModal}>
-                        <Text>{time.toLocaleTimeString()}</Text>
-                    </TouchableOpacity>
-                    {showTimePicker && (
-                        <DateTimePicker
-                            testID="timePicker"
-                            value={time}
-                            mode="time"
-                            is24Hour={true}
-                            display="default"
-                            onChange={handleTimeChange}
+                    <Menu
+                        visible={visible}
+                        onDismiss={() => setVisible(false)}
+                        anchor={
+                            <TouchableOpacity
+                                style={styles.input}
+                                onPress={() => setVisible(true)}
+                            >
+                                <Text>{dayType === 1 ? 'Full Day' : 'Half Day'}</Text>
+                            </TouchableOpacity>
+                        }
+                    >
+                        <Menu.Item
+                            onPress={() => {
+                                setDayType(1);
+                                setVisible(false);
+                            }}
+                            title="Full Day"
                         />
-                    )}
+                        <Menu.Item
+                            onPress={() => {
+                                setDayType(2);
+                                setVisible(false);
+                            }}
+                            title="Half Day"
+                        />
+                    </Menu>
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="Description"
@@ -162,7 +156,6 @@ const EventForm = ({ eventName: initialEventName = '', eventDate: initialEventDa
                     <Banner message={bannerMsg} isVisible={bannerVisible} />
                 </View>
             </View>
-
         </Provider>
     );
 };

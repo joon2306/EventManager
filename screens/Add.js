@@ -9,6 +9,7 @@ export default Add = ({ navigation }) => {
     let eventDate;
     let eventTime;
     let eventDescription;
+    let eventType;
 
     const route = useRoute();
 
@@ -17,14 +18,13 @@ export default Add = ({ navigation }) => {
     if (route && route.params) {
         eventName = route.params.eventName;
         eventDate = parseISO(route.params.eventDate);
-        const dateTime = new Date(Date.parse(`1970-01-01T${route.params.eventTime}`));
-        eventTime = new Date(dateTime);
+        eventType = route.params.eventType;
         eventDescription = route.params.eventDescription;
         isEdit = true;
     }
 
 
     return (
-        <EventForm navigation={navigation} eventDate={eventDate} eventName={eventName} eventTime={eventTime} eventDescription={eventDescription} isEdit={isEdit} />
+        <EventForm navigation={navigation} eventDate={eventDate} eventName={eventName} eventTime={eventTime} eventDescription={eventDescription} isEdit={isEdit} initialEventType={eventType} />
     )
 }

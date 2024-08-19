@@ -5,13 +5,14 @@ import { format, parse } from "date-fns";
 import { PaperProvider, Button, Searchbar, Portal, ActivityIndicator } from 'react-native-paper';
 import _ from 'lodash';
 import { Banner, ModalAlert } from '../components/CommonComponents/Common';
+import eventTypeEnum from '../utils/EventTypeEnum';
 
 export default Home = ({ navigation }) => {
     const events = {
-        '2024-04-20': [{ time: '09:00', title: 'Meeting 1', desc:"meeting desc 1" }, { time: '13:30', title: 'Meeting 2', desc:"meeting desc 2" }],
-        '2024-04-24': [{ time: '09:00', title: 'Meeting 3', desc:"meeting desc 3" }, { time: '14:30', title: 'Meeting 3', desc:"meeting desc 3" }],
-        '2024-04-25': [{ time: '09:00', title: 'event 4', desc:"meeting desc 4" }, { time: '15:30', title: 'event 5', desc:"meeting desc 5" }],
-        '2024-05-21': [{ time: '09:00', title: 'Meeting 3', desc:"meeting desc 3" }, { time: '14:30', title: 'Meeting 3', desc:"meeting desc 3" }]
+        '2024-04-20': [{  type: 1, title: 'Meeting 1', desc:"meeting desc 1" }, {  type: 1, title: 'Meeting 2', desc:"meeting desc 2" }],
+        '2024-04-24': [{  type: 2, title: 'Meeting 3', desc:"meeting desc 3" }, {  type: 2, title: 'Meeting 3', desc:"meeting desc 3" }],
+        '2024-04-25': [{  type: 1, title: 'event 4', desc:"meeting desc 4" }, { type: 1, title: 'event 5', desc:"meeting desc 5" }],
+        '2024-05-21': [{ type: 2, title: 'Meeting 3', desc:"meeting desc 3" }, {  type: 2, title: 'Meeting 3', desc:"meeting desc 3" }]
     };
 
     const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -61,19 +62,22 @@ export default Home = ({ navigation }) => {
     }
 
     const edit = (item) => {
-        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventTime: item.time, eventDescription: item.desc });
+        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.type, eventDescription: item.desc });
     }
 
 
 
     const handleRenderItem = (item) => {
-        const { time, title } = item;
+        const { type, title } = item;
+
+        const eventType = eventTypeEnum[type];
+
        
         return (
             <View style={{ padding: 10 }}>
                 <TouchableOpacity onLongPress={() => edit(item)}>
-                <Text>{time}</Text>
-                <Text>{title}</Text>
+                <Text>{title.toUpperCase()}</Text>
+                <Text>{eventType.toLowerCase()}</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -122,6 +126,9 @@ export default Home = ({ navigation }) => {
     }
 
     const findEventDates = (txt) => {
+        if(_.isEmpty(txt)) {
+            return {};
+        }
         txt = txt.toLowerCase();
         const eventMap = {};
         _.forOwn(events, (event, date) => {
