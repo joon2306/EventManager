@@ -1,4 +1,4 @@
-import supabase from "../config/config";
+import supabase, { databaseName } from "../config/config";
 
 let eventsInstance = null;
 class EventsService {
@@ -11,7 +11,7 @@ class EventsService {
     }
 
     async fetchEvents() {
-        return await supabase.from("event_test").select("*");
+        return await supabase.from(databaseName).select("*");
     }
 
     async saveEvent({ eventName, description, eventDate, dayType, eventId }) {
@@ -19,7 +19,7 @@ class EventsService {
             return await this.updateEvent({ eventId, eventName, description, eventDate, dayType });
         }
 
-        return await supabase.from("event_test").insert([
+        return await supabase.from(databaseName).insert([
             {
                 title: eventName,
                 description,
@@ -30,7 +30,7 @@ class EventsService {
     }
 
     async updateEvent({ eventId, eventName, description, eventDate, dayType }) {
-        return await supabase.from("event_test").update({
+        return await supabase.from(databaseName).update({
             title: eventName,
             description,
             startDate: eventDate,
@@ -39,7 +39,7 @@ class EventsService {
     }
 
     async deleteEventById(eventId) {
-        return await supabase.from("event_test").delete().eq('id', eventId).select();
+        return await supabase.from(databaseName).delete().eq('id', eventId).select();
     }
 
 
