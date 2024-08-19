@@ -13,9 +13,16 @@ import EventUtils from '../utils/EventUtils';
 export default Home = ({ navigation }) => {
     const [events, setEvents] = useState({});
 
+    const [fetchError, setFetchError] = useState(false);
+
     const initEvents = () => {
-        eventsService.fetchEvents().then((events) => {
-            const builtEvents = EventUtils.buildEvents(events);
+        eventsService.fetchEvents().then(({ data, error }) => {
+            if (error != null) {
+                console.error("Error fetching events:", error);
+                setFetchError(true);
+                return;
+            }
+            const builtEvents = EventUtils.buildEvents(data);
             setEvents(builtEvents);
         });
     }
@@ -79,7 +86,7 @@ export default Home = ({ navigation }) => {
 
 
         return (
-            <View style={{ padding: 10 }}>
+            <View style={{flex: 1, justifyContent: "center"}}>
                 <TouchableOpacity onLongPress={() => edit(item)}>
                     <Text>{title.toUpperCase()}</Text>
                     <Text>{type.toLowerCase()}</Text>
@@ -223,14 +230,24 @@ export default Home = ({ navigation }) => {
     return (
         <PaperProvider>
             {
-                _.isEmpty(events) && (
+                _.isEmpty(events) && !fetchError && (
                     <View style={styles.container}>
                         <Text style={styles.centeredText}>Loading events...</Text>
                     </View>
                 )
             }
+
             {
-                !_.isEmpty(events) && (
+                fetchError && (
+                    <View style={styles.container}>
+                        <Text style={styles.centeredText}>Connection Error... Try Later</Text>
+                    </View>
+                )
+            }
+
+
+            {
+                !_.isEmpty(events) && !fetchError && (
                     <View style={{ flex: 1 }}>
                         {loading &&
                             <Portal>
@@ -259,7 +276,7 @@ export default Home = ({ navigation }) => {
             <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} hideBtn={true} ></ModalAlert>
 
             {
-                !_.isEmpty(events) && (
+                !_.isEmpty(events) && !fetchError && (
                     <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
                         <Banner message={bannerMsg} isVisible={isBannerVisible} />
                         <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={() => navigation.navigate("Add Event")}> Add</Button>
@@ -272,7 +289,7 @@ export default Home = ({ navigation }) => {
                         />
                     </View>
                 )
-            } 
+            }
 
         </PaperProvider>
     );

@@ -7,7 +7,7 @@ const EventUtils = {
                 events[startDate] = [];
                 events[startDate].push({ title, description, eventType });
 
-            } else if (events[startDate] && events[startDate].length >= 0) {
+            } else {
                 events[startDate].push({ title, description, eventType });
             } 
 
