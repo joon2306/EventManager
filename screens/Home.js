@@ -11,19 +11,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import EventUtils from '../utils/EventUtils';
 
 export default Home = ({ navigation }) => {
-    const events = {
-        '2024-04-20': [{ type: 1, title: 'Meeting 1', desc: "meeting desc 1" }, { type: 1, title: 'Meeting 2', desc: "meeting desc 2" }],
-        '2024-04-24': [{ type: 2, title: 'Meeting 3', desc: "meeting desc 3" }, { type: 2, title: 'Meeting 3', desc: "meeting desc 3" }],
-        '2024-04-25': [{ type: 1, title: 'event 4', desc: "meeting desc 4" }, { type: 1, title: 'event 5', desc: "meeting desc 5" }],
-        '2024-05-21': [{ type: 2, title: 'Meeting 3', desc: "meeting desc 3" }, { type: 2, title: 'Meeting 3', desc: "meeting desc 3" }]
-    };
-
-    const [testEvents, setTestEvents] = useState({});
+    const [events, setEvents] = useState({});
 
     const initEvents = () => {
         eventsService.fetchEvents().then((events) => {
             const builtEvents = EventUtils.buildEvents(events);
-            setTestEvents(builtEvents);
+            setEvents(builtEvents);
         });
     }
 
@@ -74,7 +67,7 @@ export default Home = ({ navigation }) => {
     }
 
     const edit = (item) => {
-        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.eventType, eventDescription: item.desc });
+        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.eventType, eventDescription: item.description });
     }
 
 
@@ -230,14 +223,14 @@ export default Home = ({ navigation }) => {
     return (
         <PaperProvider>
             {
-                _.isEmpty(testEvents) && (
+                _.isEmpty(events) && (
                     <View style={styles.container}>
                         <Text style={styles.centeredText}>Loading events...</Text>
                     </View>
                 )
             }
             {
-                !_.isEmpty(testEvents) && (
+                !_.isEmpty(events) && (
                     <View style={{ flex: 1 }}>
                         {loading &&
                             <Portal>
@@ -245,7 +238,7 @@ export default Home = ({ navigation }) => {
                             </Portal>}
                         {(
                             <Agenda
-                                items={testEvents}
+                                items={events}
                                 renderItem={handleRenderItem}
                                 selected={selectedDate}
                                 onDayPress={handleDayPress}
@@ -266,7 +259,7 @@ export default Home = ({ navigation }) => {
             <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} hideBtn={true} ></ModalAlert>
 
             {
-                !_.isEmpty(testEvents) && (
+                !_.isEmpty(events) && (
                     <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
                         <Banner message={bannerMsg} isVisible={isBannerVisible} />
                         <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={() => navigation.navigate("Add Event")}> Add</Button>
