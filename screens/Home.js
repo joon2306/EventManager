@@ -8,6 +8,7 @@ import { Banner, ModalAlert } from '../components/CommonComponents/Common';
 import eventTypeEnum from '../utils/EventTypeEnum';
 import eventsService from '../service/EventsService';
 import { useFocusEffect } from '@react-navigation/native';
+import EventUtils from '../utils/EventUtils';
 
 export default Home = ({ navigation }) => {
     const events = {
@@ -17,11 +18,12 @@ export default Home = ({ navigation }) => {
         '2024-05-21': [{ type: 2, title: 'Meeting 3', desc: "meeting desc 3" }, { type: 2, title: 'Meeting 3', desc: "meeting desc 3" }]
     };
 
-    const [testEvents, setTestEvents] = useState([]);
+    const [testEvents, setTestEvents] = useState({});
 
     const initEvents = () => {
         eventsService.fetchEvents().then((events) => {
-            setTestEvents(events);
+            const builtEvents = EventUtils.buildEvents(events);
+            setTestEvents(builtEvents);
         });
     }
 
@@ -72,22 +74,22 @@ export default Home = ({ navigation }) => {
     }
 
     const edit = (item) => {
-        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.type, eventDescription: item.desc });
+        navigation.navigate('Add Event', { eventDate: selectedDate, eventName: item.title, eventType: item.eventType, eventDescription: item.desc });
     }
 
 
 
     const handleRenderItem = (item) => {
-        const { type, title } = item;
+        const { eventType, title } = item;
 
-        const eventType = eventTypeEnum[type];
+        const type = eventTypeEnum[eventType];
 
 
         return (
             <View style={{ padding: 10 }}>
                 <TouchableOpacity onLongPress={() => edit(item)}>
                     <Text>{title.toUpperCase()}</Text>
-                    <Text>{eventType.toLowerCase()}</Text>
+                    <Text>{type.toLowerCase()}</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -223,17 +225,19 @@ export default Home = ({ navigation }) => {
         }, [])
     );
 
+
+
     return (
         <PaperProvider>
             {
-                testEvents.length === 0 && (
+                _.isEmpty(testEvents) && (
                     <View style={styles.container}>
                         <Text style={styles.centeredText}>Loading events...</Text>
                     </View>
                 )
             }
             {
-                testEvents.length > 0 && (
+                !_.isEmpty(testEvents) && (
                     <View style={{ flex: 1 }}>
                         {loading &&
                             <Portal>
@@ -241,7 +245,7 @@ export default Home = ({ navigation }) => {
                             </Portal>}
                         {(
                             <Agenda
-                                items={events}
+                                items={testEvents}
                                 renderItem={handleRenderItem}
                                 selected={selectedDate}
                                 onDayPress={handleDayPress}
@@ -262,7 +266,7 @@ export default Home = ({ navigation }) => {
             <ModalAlert modalVisible={modalVisible} setModalVisible={setModalVisible} modalMessage={modalMessage} hideBtn={true} ></ModalAlert>
 
             {
-                testEvents.length > 0 && (
+                !_.isEmpty(testEvents) && (
                     <View style={{ flexDirection: 'column', justifyContent: 'center' }}>
                         <Banner message={bannerMsg} isVisible={isBannerVisible} />
                         <Button icon="calendar-plus" mode="outlined" style={{ marginHorizontal: 20 }} onPress={() => navigation.navigate("Add Event")}> Add</Button>
